@@ -1,10 +1,10 @@
-# Google Photos Upload Container
+# Google Photos Upload
 
-This Docker container allows you to upload photos to Google Photos from a local directory.
+A Python tool for uploading photos to Google Photos with automatic album organization based on directory structure.
 
 ## Prerequisites
 
-1. Docker installed on your system
+1. Python 3.7 or higher
 2. Google Photos API credentials (`client_id.json`)
 3. A directory containing photos to upload
 
@@ -27,45 +27,65 @@ This Docker container allows you to upload photos to Google Photos from a local 
 5. Download the credentials:
    - Click the download button (looks like a download arrow) next to your new OAuth 2.0 Client ID
    - Save the downloaded file as `client_id.json`
-   - Place this file in the same directory as the Dockerfile
 
-## Setup
+## Installation
 
-1. Place your `client_id.json` file in the same directory as the Dockerfile
-2. Build the Docker image:
-   ```bash
-   docker build -t gphotos-upload .
-   ```
+You can install the package in several ways:
+
+1. **From GitHub (recommended)**:
+```bash
+pip install git+https://github.com/adventcavalier/gphotos-upload.git
+```
+
+2. **For Development**:
+```bash
+git clone https://github.com/adventcavalier/gphotos-upload.git
+cd gphotos-upload
+pip install -e .
+```
 
 ## Usage
 
-Run the container by mounting your photos directory and the client_id.json file:
+### Command Line Interface
 
+1. **Upload photos to a specific album**:
 ```bash
-docker run -it \
-  -v /path/to/your/photos:/photos \
-  -v /path/to/client_id.json:/app/client_id.json \
-  gphotos-upload
+gphotos-upload --album "My Album" photo1.jpg photo2.jpg
 ```
 
-Replace:
-- `/path/to/your/photos` with the path to your local photos directory
-- `/path/to/client_id.json` with the path to your Google Photos API credentials file
+2. **Upload with authentication file**:
+```bash
+gphotos-upload --auth auth.json --album "My Album" photo1.jpg photo2.jpg
+```
 
-## Authentication
+3. **Upload with logging**:
+```bash
+gphotos-upload --log upload.log --album "My Album" photo1.jpg photo2.jpg
+```
 
-The first time you run the container, it will open a browser window for Google Photos authentication. You'll need to:
-1. Log in to your Google account
-2. Grant the necessary permissions
-3. Copy the authentication code back to the terminal
+### As a Python Package
+
+```python
+from gphotos_upload import GooglePhotosClient, Config
+
+# Create a client
+config = Config.from_env()
+client = GooglePhotosClient(config, auth_file="auth.json")
+
+# Upload photos to an album
+client.upload_photos(["photo1.jpg", "photo2.jpg"], "My Album")
+
+# Upload from directory structure
+client.upload_photos_from_directory("/path/to/photos")
+```
 
 ## Directory Structure and Album Creation
 
 The script automatically mirrors your local folder structure to create albums in Google Photos. Here's how it works:
 
-1. **Root Directory**: The directory you mount to `/photos` in the container becomes your root directory
+1. **Root Directory**: The directory you specify becomes your root directory
 2. **Album Creation**: 
-   - Each subdirectory in your root directory becomes a separate album in Google Photos
+   - Each subdirectory becomes a separate album in Google Photos
    - The album name will match the subdirectory name exactly
    - If an album with the same name already exists in Google Photos, the script will use the existing album
 3. **Photo Organization**:
@@ -97,9 +117,17 @@ This will create the following albums in Google Photos:
 - "Family Photos" containing IMG_004.jpg and IMG_005.jpg
 - "Events" containing IMG_006.jpg, IMG_007.jpg, IMG_008.jpg, and IMG_009.jpg
 
-## Notes
+## Environment Variables
 
-- The container will create albums based on the directory structure in your photos folder
-- Each subdirectory will become a separate album in Google Photos
-- Photos will be uploaded in natural sort order within each album
-- Progress bars will show the upload status for both albums and photos
+You can configure the tool using environment variables:
+
+- `GPHOTOS_API_BASE_URL`: Base URL for the Google Photos API
+- `GPHOTOS_AUTH_PORT`: Port for OAuth authentication server (default: 8080)
+- `GPHOTOS_AUTH_HOST`: Host for OAuth authentication server (default: localhost)
+- `GPHOTOS_MAX_RETRIES`: Maximum number of upload retries (default: 3)
+- `GPHOTOS_RETRY_DELAY`: Delay between retries in seconds (default: 5)
+- `GPHOTOS_LOG_LEVEL`: Logging level (default: INFO)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
