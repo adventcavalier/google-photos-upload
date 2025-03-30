@@ -46,6 +46,19 @@ pip install -e .
 
 ## Usage
 
+### Simple Directory Upload
+
+The simplest way to use the tool is to specify a directory containing your photos. The tool will automatically create albums based on the folder structure:
+
+```bash
+gphotos-upload /path/to/your/photos
+```
+
+This will:
+- Create albums based on your folder structure
+- Upload all photos to their respective albums
+- Show progress bars for both album creation and photo uploads
+
 ### Command Line Interface
 
 1. **Upload photos to a specific album**:
