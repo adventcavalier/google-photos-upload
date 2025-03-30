@@ -1,0 +1,4 @@
+google-auth-oauthlib>=0.4.6
+google-auth>=2.3.3
+tqdm>=4.65.0
+natsort>=8.4.0 
